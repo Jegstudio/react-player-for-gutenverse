@@ -38,7 +38,7 @@ module.exports = __toCommonJS(YouTube_exports);
 var import_react = __toESM(require("react"));
 var import_utils = require("../utils");
 var import_patterns = require("../patterns");
-const SDK_URL = (0, import_utils.getAssetPath)() + "/reactplayer-youtube-api.js";
+const SDK_URL = "https://www.youtube.com/iframe_api";
 const SDK_GLOBAL = "YT";
 const SDK_GLOBAL_READY = "onYouTubeIframeAPIReady";
 const MATCH_PLAYLIST = /[?&](?:list|channel)=([a-zA-Z0-9_-]+)/;
