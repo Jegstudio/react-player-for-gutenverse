@@ -41,16 +41,7 @@ var import_patterns = require("../patterns");
 const HAS_NAVIGATOR = typeof navigator !== "undefined";
 const IS_IPAD_PRO = HAS_NAVIGATOR && navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
 const IS_IOS = HAS_NAVIGATOR && (/iPad|iPhone|iPod/.test(navigator.userAgent) || IS_IPAD_PRO) && !window.MSStream;
-const IS_SAFARI = HAS_NAVIGATOR && /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && !window.MSStream;
-const HLS_SDK_URL = (0, import_utils.getAssetPath)() + "/reactplayer-hls.min.js";
-const HLS_GLOBAL = "Hls";
-const DASH_SDK_URL = (0, import_utils.getAssetPath)() + "/reactplayer-dash.all.min.js";
-const DASH_GLOBAL = "dashjs";
-const FLV_SDK_URL = (0, import_utils.getAssetPath)() + "/reactplayer-flv.min.js";
-const FLV_GLOBAL = "flvjs";
 const MATCH_DROPBOX_URL = /www\.dropbox\.com\/.+/;
-const MATCH_CLOUDFLARE_STREAM = /https:\/\/watch\.cloudflarestream\.com\/([a-z0-9]+)/;
-const REPLACE_CLOUDFLARE_STREAM = "https://videodelivery.net/{id}/manifest/video.m3u8";
 class FilePlayer extends import_react.Component {
   constructor() {
     super(...arguments);
@@ -129,12 +120,9 @@ class FilePlayer extends import_react.Component {
   componentWillUnmount() {
     this.player.removeAttribute("src");
     this.removeListeners(this.player);
-    if (this.hls) {
-      this.hls.destroy();
-    }
   }
   addListeners(player) {
-    const { url, playsinline } = this.props;
+    const { playsinline } = this.props;
     player.addEventListener("play", this.onPlay);
     player.addEventListener("waiting", this.onBuffer);
     player.addEventListener("playing", this.onBufferEnd);
@@ -146,16 +134,13 @@ class FilePlayer extends import_react.Component {
     player.addEventListener("enterpictureinpicture", this.onEnablePIP);
     player.addEventListener("leavepictureinpicture", this.onDisablePIP);
     player.addEventListener("webkitpresentationmodechanged", this.onPresentationModeChange);
-    if (!this.shouldUseHLS(url)) {
-      player.addEventListener("canplay", this.onReady);
-    }
     if (playsinline) {
       player.setAttribute("playsinline", "");
       player.setAttribute("webkit-playsinline", "");
       player.setAttribute("x5-playsinline", "");
     }
   }
-  removeListeners(player, url) {
+  removeListeners(player) {
     player.removeEventListener("canplay", this.onReady);
     player.removeEventListener("play", this.onPlay);
     player.removeEventListener("waiting", this.onBuffer);
@@ -168,9 +153,6 @@ class FilePlayer extends import_react.Component {
     player.removeEventListener("enterpictureinpicture", this.onEnablePIP);
     player.removeEventListener("leavepictureinpicture", this.onDisablePIP);
     player.removeEventListener("webkitpresentationmodechanged", this.onPresentationModeChange);
-    if (!this.shouldUseHLS(url)) {
-      player.removeEventListener("canplay", this.onReady);
-    }
   }
   shouldUseAudio(props) {
     if (props.config.forceVideo) {
@@ -181,72 +163,7 @@ class FilePlayer extends import_react.Component {
     }
     return import_patterns.AUDIO_EXTENSIONS.test(props.url) || props.config.forceAudio;
   }
-  shouldUseHLS(url) {
-    if (IS_SAFARI && this.props.config.forceSafariHLS || this.props.config.forceHLS) {
-      return true;
-    }
-    if (IS_IOS || this.props.config.forceDisableHls) {
-      return false;
-    }
-    return import_patterns.HLS_EXTENSIONS.test(url) || MATCH_CLOUDFLARE_STREAM.test(url);
-  }
-  shouldUseDASH(url) {
-    return import_patterns.DASH_EXTENSIONS.test(url) || this.props.config.forceDASH;
-  }
-  shouldUseFLV(url) {
-    return import_patterns.FLV_EXTENSIONS.test(url) || this.props.config.forceFLV;
-  }
   load(url) {
-    const { hlsVersion, hlsOptions, dashVersion, flvVersion } = this.props.config;
-    if (this.hls) {
-      this.hls.destroy();
-    }
-    if (this.dash) {
-      this.dash.reset();
-    }
-    if (this.shouldUseHLS(url)) {
-      (0, import_utils.getSDK)(HLS_SDK_URL.replace("VERSION", hlsVersion), HLS_GLOBAL).then((Hls) => {
-        this.hls = new Hls(hlsOptions);
-        this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          this.props.onReady();
-        });
-        this.hls.on(Hls.Events.ERROR, (e, data) => {
-          this.props.onError(e, data, this.hls, Hls);
-        });
-        if (MATCH_CLOUDFLARE_STREAM.test(url)) {
-          const id = url.match(MATCH_CLOUDFLARE_STREAM)[1];
-          this.hls.loadSource(REPLACE_CLOUDFLARE_STREAM.replace("{id}", id));
-        } else {
-          this.hls.loadSource(url);
-        }
-        this.hls.attachMedia(this.player);
-        this.props.onLoaded();
-      });
-    }
-    if (this.shouldUseDASH(url)) {
-      (0, import_utils.getSDK)(DASH_SDK_URL.replace("VERSION", dashVersion), DASH_GLOBAL).then((dashjs) => {
-        this.dash = dashjs.MediaPlayer().create();
-        this.dash.initialize(this.player, url, this.props.playing);
-        this.dash.on("error", this.props.onError);
-        if (parseInt(dashVersion) < 3) {
-          this.dash.getDebug().setLogToBrowserConsole(false);
-        } else {
-          this.dash.updateSettings({ debug: { logLevel: dashjs.Debug.LOG_LEVEL_NONE } });
-        }
-        this.props.onLoaded();
-      });
-    }
-    if (this.shouldUseFLV(url)) {
-      (0, import_utils.getSDK)(FLV_SDK_URL.replace("VERSION", flvVersion), FLV_GLOBAL).then((flvjs) => {
-        this.flv = flvjs.createPlayer({ type: "flv", url });
-        this.flv.attachMediaElement(this.player);
-        this.flv.on(flvjs.Events.ERROR, (e, data) => {
-          this.props.onError(e, data, this.flv, flvjs);
-        });
-        this.flv.load();
-        this.props.onLoaded();
-      });
-    }
     if (url instanceof Array) {
       this.player.load();
     } else if ((0, import_utils.isMediaStream)(url)) {
@@ -268,9 +185,6 @@ class FilePlayer extends import_react.Component {
   }
   stop() {
     this.player.removeAttribute("src");
-    if (this.dash) {
-      this.dash.reset();
-    }
   }
   seekTo(seconds, keepPlaying = true) {
     this.player.currentTime = seconds;
@@ -331,10 +245,7 @@ class FilePlayer extends import_react.Component {
     return end;
   }
   getSource(url) {
-    const useHLS = this.shouldUseHLS(url);
-    const useDASH = this.shouldUseDASH(url);
-    const useFLV = this.shouldUseFLV(url);
-    if (url instanceof Array || (0, import_utils.isMediaStream)(url) || useHLS || useDASH || useFLV) {
+    if (url instanceof Array || (0, import_utils.isMediaStream)(url)) {
       return void 0;
     }
     if (MATCH_DROPBOX_URL.test(url)) {

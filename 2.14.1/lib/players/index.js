@@ -70,24 +70,6 @@ var players_default = [
     ))
   },
   {
-    key: "streamable",
-    name: "Streamable",
-    canPlay: import_patterns.canPlay.streamable,
-    lazyPlayer: (0, import_utils.lazy)(() => import(
-      /* webpackChunkName: 'reactPlayerStreamable' */
-      "./Streamable"
-    ))
-  },
-  {
-    key: "wistia",
-    name: "Wistia",
-    canPlay: import_patterns.canPlay.wistia,
-    lazyPlayer: (0, import_utils.lazy)(() => import(
-      /* webpackChunkName: 'reactPlayerWistia' */
-      "./Wistia"
-    ))
-  },
-  {
     key: "twitch",
     name: "Twitch",
     canPlay: import_patterns.canPlay.twitch,
@@ -103,33 +85,6 @@ var players_default = [
     lazyPlayer: (0, import_utils.lazy)(() => import(
       /* webpackChunkName: 'reactPlayerDailyMotion' */
       "./DailyMotion"
-    ))
-  },
-  {
-    key: "mixcloud",
-    name: "Mixcloud",
-    canPlay: import_patterns.canPlay.mixcloud,
-    lazyPlayer: (0, import_utils.lazy)(() => import(
-      /* webpackChunkName: 'reactPlayerMixcloud' */
-      "./Mixcloud"
-    ))
-  },
-  {
-    key: "vidyard",
-    name: "Vidyard",
-    canPlay: import_patterns.canPlay.vidyard,
-    lazyPlayer: (0, import_utils.lazy)(() => import(
-      /* webpackChunkName: 'reactPlayerVidyard' */
-      "./Vidyard"
-    ))
-  },
-  {
-    key: "kaltura",
-    name: "Kaltura",
-    canPlay: import_patterns.canPlay.kaltura,
-    lazyPlayer: (0, import_utils.lazy)(() => import(
-      /* webpackChunkName: 'reactPlayerKaltura' */
-      "./Kaltura"
     ))
   },
   {

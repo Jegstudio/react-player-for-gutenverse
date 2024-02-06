@@ -95,20 +95,9 @@ const propTypes = {
       dashVersion: string,
       flvVersion: string
     }),
-    wistia: shape({
-      options: object,
-      playerId: string,
-      customControls: array
-    }),
-    mixcloud: shape({
-      options: object
-    }),
     twitch: shape({
       options: object,
       playerId: string
-    }),
-    vidyard: shape({
-      options: object
     })
   }),
   onReady: func,
@@ -208,22 +197,9 @@ const defaultProps = {
       flvVersion: "1.5.0",
       forceDisableHls: false
     },
-    wistia: {
-      options: {},
-      playerId: null,
-      customControls: null
-    },
-    mixcloud: {
-      options: {
-        hide_cover: 1
-      }
-    },
     twitch: {
       options: {},
       playerId: null
-    },
-    vidyard: {
-      options: {}
     }
   },
   onReady: noop,

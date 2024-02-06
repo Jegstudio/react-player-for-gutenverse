@@ -188,6 +188,5 @@ function enableStubOn(fn) {
 }
 function getAssetPath() {
   const { framework_asset } = window.GutenverseFrontendConfig;
-  console.log({ framework_asset });
   return framework_asset + "js";
 }
