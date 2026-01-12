@@ -9,7 +9,8 @@
         "lib",
         "lazy",
         "dist",
-        "types"
+        "types",
+        "api"
     ],
     "scripts": {
         "clean": "rimraf lib lazy demo coverage *.d.ts",
